@@ -5,7 +5,7 @@ from urllib2 import urlopen
 import unicodedata
 
 print("######### Importando datos de personas #########")
-path_url  = '
+path_url  = 'https://api.pipedrive.com/v1/persons:(id,org_id,name,phone,email,4ec550c8ad97ef93d2206d97a89b5042a287f360,10c6f29db285091a1d2854ff95fc5f864233905d,17852a8bfe7875c8426908547a6746954920495f,add_time,0f2ec4fcdff4df19ba746a04903303ea21948924,23f6f926a83f8c72a845c09920ca22dc194fb35a)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d'
 r=urlopen(path_url)
 data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
 #Def de campos varibles
@@ -44,7 +44,7 @@ def estdo_personal(argument):
         '203': "Yucatan",
         '204': "Zacatecas",
     }
-
+    return switcher.get(argument, "nothing")
 #Sql Injection
 c = 0
 for datos in data["data"]:
@@ -85,6 +85,9 @@ for datos in data["data"]:
     else:
         Edo = estdo_personal(datos['23f6f926a83f8c72a845c09920ca22dc194fb35a'])
         sql += ',\'' + str(Edo) + '\''
+    #Bloque sql del viejo sistema
+    sql += ',\'0\',\'0\',\'0\',\'0\''
+    sql += ',\'0\',\'0\',\'0\')'
     print(sql)
 
 print("######### Registros Procesador a MSQLServer No.:" + str(c) + "##########")
