@@ -4,7 +4,7 @@ import json
 from urllib2 import urlopen
 import unicodedata
 
-print("######### Importando datos de organizaciones #########")
+print("######### Importando datos de Organizaciones #########")
 path_url  = ''
 r=urlopen(path_url)
 data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
@@ -141,4 +141,4 @@ for datos in data["data"]:
     sql += ',\'01-01-1900\',\'Beneficio6\',\'Observaciones18\',\'01-01-1900\',\'Beneficio7\''
     sql += ',\'Observaciones20\',\'VendedorPreferente\',\'0\',\'0\',\'0\',\'0\')'
     print(sql)
-print("######### Registros Procesador a MSQLServer No.:" + str(c) + "##########")
+print("######### Registros proesados a MSQLServer No.:" + str(c) + "##########")
