@@ -5,7 +5,7 @@ from urllib2 import urlopen
 import unicodedata
 
 print("######### Importando datos de Negocios #########")
-path_url  = 'https://api.pipedrive.com/v1/deals:(id,person_id,org_id,title,9d6b02fe5f3a6926be97fe956149713d8876eb94,add_time,next_activity_date,close_time,value,8ee24c17f3ac04493089780b7cffee1512a1c134,fc28f857b56a26688545ca6f23157b3f2a906d5f,949f438cfe1937242f13455abddc2fd5ce83d8b6,5fbdf9384d1386ea81869f1916f8b5315c8de476,6a3fcf31541cf6790d804c1d3815d2a26292fcae,5ca7ac46b820ac0bd01c58d55856386f37969ec0,status)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d'
+path_url  = ''
 r=urlopen(path_url)
 data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
 #Switchers
