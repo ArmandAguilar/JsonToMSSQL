@@ -5,9 +5,6 @@ from urllib2 import urlopen
 import unicodedata
 
 print("######### Importando datos de Personas #########")
-path_url  = ''
-r=urlopen(path_url)
-data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
 #Def de campos varibles
 def estdo_personal(argument):
     switcher = {
@@ -47,47 +44,57 @@ def estdo_personal(argument):
     return switcher.get(argument, "nothing")
 #Sql Injection
 c = 0
-for datos in data["data"]:
-    c = c+1;
-    sql = str(c) + '.-INSERT INTO [SAP].[dbo].[Clientes] VALUES(\''
-    #Id
-    sql += str(datos['id']) + '\''
-    #IdEmpresa
-    sql += str(datos['org_id']['value']) + '\''
-    #Nombre
-    sql += ',\'' + datos['name'] + '\''
-    #Bloque sql del  viejo sistema
-    sql += ',\'ApellidoP\',\'ApellidoM\''
-    #Telefono
-    sql += ',\'' + unicode(datos['phone'][0]['value']) + '\''
-    #Bloque sql del viejo sistema
-    sql += ',\'Extencio\',\'Telefono2\',\'Extencion2\',\'Telefono3\',\'Extncion3\''
-    sql += ',\'Fax\',\'ExtencionFax\',\'Radio\',\'ExtencionRadio\',\'Celular\''
-    #Email
-    sql += ',\'' + str(datos['email'][0]['value']) + '\''
-    #Bloque sql
-    sql += 'emial2'
-    #Puesto
-    sql += ',\'' + unicode(datos['4ec550c8ad97ef93d2206d97a89b5042a287f360']) + '\''
-    #Tratamiento
-    sql += ',\'' + unicode(datos['10c6f29db285091a1d2854ff95fc5f864233905d']) + '\''
-    #Calificacion
-    sql += ',\'' + unicode(datos['17852a8bfe7875c8426908547a6746954920495f']) + '\''
-    #Fecha de registro
-    sql += ',\'' + str(datos['add_time']) + '\''
-    #Bloque de  sql viejo sistema
-    sql += ',\'FormaContacto\''
-    #Disc
-    sql += ',\'' + unicode(datos['0f2ec4fcdff4df19ba746a04903303ea21948924']) + '\''
-    #Estado
-    if unicode(datos['23f6f926a83f8c72a845c09920ca22dc194fb35a']) == '':
-        sql += ',\'Estado\''
-    else:
-        Edo = estdo_personal(datos['23f6f926a83f8c72a845c09920ca22dc194fb35a'])
-        sql += ',\'' + str(Edo) + '\''
-    #Bloque sql del viejo sistema
-    sql += ',\'0\',\'0\',\'0\',\'0\''
-    sql += ',\'0\',\'0\',\'0\')'
-    print(sql)
+#Iteramos para sacar todos los Registros
+Paginas =  0
+Limite = True
+while Limite == True:
+    Paginas += 100
+    path_url  = ''
+    r=urlopen(path_url)
+    data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
+    Limite= data['additional_data']['pagination']['more_items_in_collection']
+
+    for datos in data["data"]:
+        c = c+1;
+        sql = str(c) + '.-INSERT INTO [SAP].[dbo].[Clientes] VALUES(\''
+        #Id
+        sql += str(datos['id']) + '\''
+        #IdEmpresa
+        sql += str(datos['org_id']['value']) + '\''
+        #Nombre
+        sql += ',\'' + datos['name'] + '\''
+        #Bloque sql del  viejo sistema
+        sql += ',\'ApellidoP\',\'ApellidoM\''
+        #Telefono
+        sql += ',\'' + unicode(datos['phone'][0]['value']) + '\''
+        #Bloque sql del viejo sistema
+        sql += ',\'Extencio\',\'Telefono2\',\'Extencion2\',\'Telefono3\',\'Extncion3\''
+        sql += ',\'Fax\',\'ExtencionFax\',\'Radio\',\'ExtencionRadio\',\'Celular\''
+        #Email
+        sql += ',\'' + str(datos['email'][0]['value']) + '\''
+        #Bloque sql
+        sql += 'emial2'
+        #Puesto
+        sql += ',\'' + unicode(datos['4ec550c8ad97ef93d2206d97a89b5042a287f360']) + '\''
+        #Tratamiento
+        sql += ',\'' + unicode(datos['10c6f29db285091a1d2854ff95fc5f864233905d']) + '\''
+        #Calificacion
+        sql += ',\'' + unicode(datos['17852a8bfe7875c8426908547a6746954920495f']) + '\''
+        #Fecha de registro
+        sql += ',\'' + str(datos['add_time']) + '\''
+        #Bloque de  sql viejo sistema
+        sql += ',\'FormaContacto\''
+        #Disc
+        sql += ',\'' + unicode(datos['0f2ec4fcdff4df19ba746a04903303ea21948924']) + '\''
+        #Estado
+        if unicode(datos['23f6f926a83f8c72a845c09920ca22dc194fb35a']) == '':
+            sql += ',\'Estado\''
+        else:
+            Edo = estdo_personal(datos['23f6f926a83f8c72a845c09920ca22dc194fb35a'])
+            sql += ',\'' + str(Edo) + '\''
+        #Bloque sql del viejo sistema
+        sql += ',\'0\',\'0\',\'0\',\'0\''
+        sql += ',\'0\',\'0\',\'0\')'
+        print(sql)
 
 print("######### Registros proesados a MSQLServer No.:" + str(c) + "##########")
