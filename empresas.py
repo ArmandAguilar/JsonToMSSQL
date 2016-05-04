@@ -3,23 +3,23 @@
 import json
 from urllib2 import urlopen
 import unicodedata
-import pymssql
+#import pymssql
 print("######### Importando datos de Organizaciones #########")
 #Def para borrar tabla sql
-def borrar_empresas(arg):
-    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
-    cur = conn.cursor()
-    cur.execute('DELETE FROM [SAP].[dbo].[Empresas]')
-    conn.commit()
-    conn.close()
-    return arg
-def insertar(sql):
-    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
-    cur = conn.cursor()
-    cur.execute('sql)
-    conn.commit()
-    conn.close()
-    return conn
+#def borrar_empresas(arg):
+#    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+#    cur = conn.cursor()
+#    cur.execute('DELETE FROM [SAP].[dbo].[Empresas]')
+#    conn.commit()
+#    conn.close()
+#    return arg
+#def insertar(sql):
+#    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+#    cur = conn.cursor()
+#    cur.execute('sql)
+#    conn.commit()
+#    conn.close()
+#    return conn
 #Def de campos varibles
 def estdo_empresa(argument):
     switcher = {
@@ -79,8 +79,8 @@ def perfil_empresa(argument):
     }
     return switcher.get(argument, "nothing")
 #Borramos la tabala
-DelStatus = borrar_empresas('Borrando tabla empresas....')
-print(DelStatus)
+#DelStatus = borrar_empresas('Borrando tabla empresas....')
+#print(DelStatus)
 #Sql Injection
 c = 0
 #Iteramos para sacar todos los Registros
@@ -88,7 +88,7 @@ Paginas =  0
 Limite = True
 while Limite == True:
     Paginas += 100
-    path_url  = ''
+    path_url  = 'https://api.pipedrive.com/v1/organizations:(id,name,52d696d9b7a5bb5720c17ca1b711061693067b6e,88f1db137d17d589d2335cf77ef4f06d3ac30809,30d6284d10ed91edf62d222d51d441f2a5bca1fc,73f181bd11548510a4dcfadafc036ff5dcdde8ae,dd8264651561775a4d9eb4f843811bc599649cb6,add_time,22b81f40f537c0d5b2aabe3041fd6df1967dac52,ee637749af8f57299eb455821a26dce35cf928ba)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d&start=' + str(Paginas) + 'limit=100'
     r=urlopen(path_url)
     data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
@@ -101,32 +101,32 @@ while Limite == True:
         sql += ',\'' + datos['name'] + '\''
         #R. Social
         if datos['52d696d9b7a5bb5720c17ca1b711061693067b6e'] == '':
-            sql += ',\'R.Social-Vacio\''
+            sql += ',\'R.Social\''
         else:
             sql += ',\'' + unicode(datos['52d696d9b7a5bb5720c17ca1b711061693067b6e']) + '\''
         #RFC
         if datos['88f1db137d17d589d2335cf77ef4f06d3ac30809'] == '':
-            sql += ',\'RFC-Vacio\''
+            sql += ',\'RFC\''
         else:
             sql += ',\'' + str(datos['88f1db137d17d589d2335cf77ef4f06d3ac30809']) + '\''
         #Dir Fiscal
         if datos['30d6284d10ed91edf62d222d51d441f2a5bca1fc'] == '':
-            sql += ',\'Dir. Fiscal\''
+            sql += ',\'Dir\''
         else:
             sql += ',\'' + unicode(datos['30d6284d10ed91edf62d222d51d441f2a5bca1fc']) + '\''
         #Dir Entrega campo vacio
-        sql += ',\'Dir-Entrega \''
+        sql += ',\'D\''
         #Beneficio
-        sql += ',\'Beneficios\''
+        sql += ',\'B\''
         #Giro
         if datos['73f181bd11548510a4dcfadafc036ff5dcdde8ae'] == '':
-            sql += ',\'Giro-Vacio\''
+            sql += ',\'G\''
         else:
             giro = perfil_empresa(datos['73f181bd11548510a4dcfadafc036ff5dcdde8ae'])
             sql += ',\'' + giro + '\''
             #Web
         if datos['dd8264651561775a4d9eb4f843811bc599649cb6'] == '':
-            sql += ',\'web\''
+            sql += ',\'w\''
         else:
             sql += ',\'' + unicode(datos['dd8264651561775a4d9eb4f843811bc599649cb6']) + '\''
         #Datos vacio
@@ -143,27 +143,27 @@ while Limite == True:
             Edo = estdo_empresa(datos['22b81f40f537c0d5b2aabe3041fd6df1967dac52'])
             sql += ',\'' + Edo + '\''
         #Bloque de sql
-        sql += ',\'Telefono\',\'Extencion\',\'Telefono2\',\'Extencion2\',\'Telefono3\',\'Extencion3\',\'0\''
+        sql += ',\'T\',\'E\',\'T\',\'E\',\'T\',\'E\',\'0\''
         sql += ',\'0\',\'0\',\'01-01-1900\',\'0\',\'0\''
         sql += ',\'0\',\'01-01-1900\',\'0\',\'0\',\'0\''
         sql += ',\'01-01-1900\',\'0\',\'0\',\'0\',\'01-01-1900\''
-        sql += ',\'0\',\'0\',\'0\',\'01-01-1900\',\'Potencial1\''
-        sql += ',\'Observaciones1\',\'01-01-1900\',\'Protencial2\',\'Observaciones2\',\'01-01-1900\',\'Potencial3\',\'Observaciones3\',\'01-01-1900\''
+        sql += ',\'0\',\'0\',\'0\',\'01-01-1900\',\'P\''
+        sql += ',\'O\',\'01-01-1900\',\'P\',\'O\',\'01-01-1900\',\'P\',\'O\',\'01-01-1900\''
         #Penticla 4
         if datos['ee637749af8f57299eb455821a26dce35cf928ba'] == "":
             sql += '\'Potencial4\''
         else:
             sql += ',\'' + str(datos['ee637749af8f57299eb455821a26dce35cf928ba']) + '\''
         #Bloque de sql
-        sql += ',\'Observaciones4\',\'01-01-1900\',\'Potencial5\',\'Observaciones19\',\'Involucramiento1\',\'Observaciones5\''
-        sql += ',\'01-01-1900\',\'Involucramiento2\',\'Observaciones6\',\'01-01-1900\',\'Involucramiento3\',\'Observaciones7\',\'01-01-1900\''
-        sql += ',\'Involucramiento4\',\'Observaciones8\',\'01-01-1900\',\'Involucramiento5\',\'Observaciones9\''
-        sql += ',\'01-01-1900\',\'Riesgo1\',\'Observaciones10\',\'01-01-1900\',\'Riesgo2\',\'Observaciones11\''
-        sql += ',\'01-01-1900\',\'Riesgo3\',\'Observaciones12\',\'01-01-1900\',\'Beneficio1\',\'Observaciones13\''
-        sql += ',\'01-01-1900\',\'Beneficio2\',\'Observaciones14\',\'01-01-1900\',\'Beneficio3\',\'Observaciones15\''
-        sql += ',\'01-01-1900\',\'Beneficio4\',\'Observaciones16\',\'01-01-1900\',\'Beneficio5\',\'Observaciones17\''
-        sql += ',\'01-01-1900\',\'Beneficio6\',\'Observaciones18\',\'01-01-1900\',\'Beneficio7\''
-        sql += ',\'Observaciones20\',\'VendedorPreferente\',\'0\',\'0\',\'0\',\'0\')'
-        insertar(sql)
+        sql += ',\'O\',\'01-01-1900\',\'P\',\'O\',\'I\',\'O\''
+        sql += ',\'01-01-1900\',\'I\',\'O\',\'01-01-1900\',\'I\',\'O\',\'01-01-1900\''
+        sql += ',\'I\',\'O\',\'01-01-1900\',\'I\',\'O\''
+        sql += ',\'01-01-1900\',\'R\',\'O\',\'01-01-1900\',\'R\',\'O\''
+        sql += ',\'01-01-1900\',\'R\',\'O\',\'01-01-1900\',\'B\',\'O\''
+        sql += ',\'01-01-1900\',\'B\',\'O\',\'01-01-1900\',\'B\',\'O\''
+        sql += ',\'01-01-1900\',\'B\',\'O\',\'01-01-1900\',\'B\',\'O\''
+        sql += ',\'01-01-1900\',\'B\',\'O\',\'01-01-1900\',\'B\''
+        sql += ',\'O\',\'V\',\'0\',\'0\',\'0\',\'0\')'
+        #insertar(sql)
         print(sql)
 print("######### Registros proesados a MSQLServer No.:" + str(c) + "##########")
