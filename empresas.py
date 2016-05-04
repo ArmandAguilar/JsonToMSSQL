@@ -3,8 +3,23 @@
 import json
 from urllib2 import urlopen
 import unicodedata
-
+import pymssql
 print("######### Importando datos de Organizaciones #########")
+#Def para borrar tabla sql
+def borrar_empresas(arg):
+    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    cur = conn.cursor()
+    cur.execute('DELETE FROM [SAP].[dbo].[Empresas]')
+    conn.commit()
+    conn.close()
+    return arg
+def insertar(sql):
+    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    cur = conn.cursor()
+    cur.execute('sql)
+    conn.commit()
+    conn.close()
+    return conn
 #Def de campos varibles
 def estdo_empresa(argument):
     switcher = {
@@ -63,6 +78,9 @@ def perfil_empresa(argument):
         '157': "InfraestructuraPublica",
     }
     return switcher.get(argument, "nothing")
+#Borramos la tabala
+DelStatus = borrar_empresas('Borrando tabla empresas....')
+print(DelStatus)
 #Sql Injection
 c = 0
 #Iteramos para sacar todos los Registros
@@ -146,5 +164,6 @@ while Limite == True:
         sql += ',\'01-01-1900\',\'Beneficio4\',\'Observaciones16\',\'01-01-1900\',\'Beneficio5\',\'Observaciones17\''
         sql += ',\'01-01-1900\',\'Beneficio6\',\'Observaciones18\',\'01-01-1900\',\'Beneficio7\''
         sql += ',\'Observaciones20\',\'VendedorPreferente\',\'0\',\'0\',\'0\',\'0\')'
+        insertar(sql)
         print(sql)
 print("######### Registros proesados a MSQLServer No.:" + str(c) + "##########")
