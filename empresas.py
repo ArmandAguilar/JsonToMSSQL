@@ -7,14 +7,14 @@ import unicodedata
 print("######### Importando datos de Organizaciones #########")
 #Def para borrar tabla sql
 #def borrar_empresas(arg):
-#    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+#    conn = pymssql.connect(host='',user='',password='',database='')
 #    cur = conn.cursor()
 #    cur.execute('DELETE FROM [SAP].[dbo].[Empresas]')
 #    conn.commit()
 #    conn.close()
 #    return arg
 #def insertar(sql):
-#    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+#    conn = pymssql.connect(host='',user='',password='',database='')
 #    cur = conn.cursor()
 #    cur.execute('sql)
 #    conn.commit()
@@ -88,7 +88,7 @@ Paginas =  0
 Limite = True
 while Limite == True:
     Paginas += 100
-    path_url  = 'https://api.pipedrive.com/v1/organizations:(id,name,52d696d9b7a5bb5720c17ca1b711061693067b6e,88f1db137d17d589d2335cf77ef4f06d3ac30809,30d6284d10ed91edf62d222d51d441f2a5bca1fc,73f181bd11548510a4dcfadafc036ff5dcdde8ae,dd8264651561775a4d9eb4f843811bc599649cb6,add_time,22b81f40f537c0d5b2aabe3041fd6df1967dac52,ee637749af8f57299eb455821a26dce35cf928ba)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d&start=' + str(Paginas) + 'limit=100'
+    path_url  = ''
     r=urlopen(path_url)
     data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
