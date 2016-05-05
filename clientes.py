@@ -3,45 +3,66 @@
 import json
 from urllib2 import urlopen
 import unicodedata
-
+import pymssql
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 print("######### Importando datos de Personas #########")
+#Def para borrar tabla sql
+def borrar_clientes(arg):
+    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    cur = conn.cursor()
+    cur.execute('DELETE FROM [SAP].[dbo].[Clientes]')
+    conn.commit()
+    conn.close()
+    return arg
+def insertar(sql):
+    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+    conn.close()
+    return conn
 #Def de campos varibles
 def estdo_personal(argument):
     switcher = {
-        '172': "Aguascalientes",
-        '173': "Baja California",
-        '174': "Baja California Sur",
-        '175': "Campeche",
-        '176': "Chiapas",
-        '177': "Chihuahua",
-        '178': "Coahuila",
-        '179': "Colima",
-        '180': "CDMX",
-        '181': "Durango",
-        '182': "Estado de Mexico",
-        '183': "Guanajuato",
-        '184': "Guerrero",
-        '185': "Hidalgo",
-        '186': "Jalisco",
-        '187': "Michoacan",
-        '189': "Morelos",
-        '190': "Nayarit",
-        '191': "Nuevo Leon",
-        '192': "Oaxaca",
-        '193': "Puebla",
-        '194': "Queretaro",
-        '195': "Quintana Roo",
-        '196': "San Luis Potosi",
-        '197': "Sinaloa",
-        '198': "Sonora",
-        '199': "Tabasco",
-        '200': "Tamaulipas",
-        '201': "Tlaxcala",
-        '202': "Veracruz",
-        '203': "Yucatan",
-        '204': "Zacatecas",
+        '110': "Aguascalientes",
+        '111': "Baja California",
+        '112': "Baja California Sur",
+        '113': "Campeche",
+        '114': "Chiapas",
+        '115': "Chihuahua",
+        '116': "Coahuila",
+        '117': "Colima",
+        '118': "CDMX",
+        '119': "Durango",
+        '120': "Estado de México",
+        '121': "Guanajuato",
+        '122': "Guerrero",
+        '123': "Hidalgo",
+        '124': "Jalisco",
+        '125': "Michoacán",
+        '126': "Morelos",
+        '127': "Nayarit",
+        '128': "Nuevo León",
+        '129': "Oaxaca",
+        '130': "Puebla",
+        '131': "Queretaro",
+        '132': "Quintana Roo",
+        '133': "San Luis Potosí",
+        '134': "Sinaloa",
+        '135': "Sonora",
+        '136': "Tabasco",
+        '137': "Tamaulipas",
+        '138': "Tlaxcala",
+        '139': "Veracruz",
+        '140': "Yucatán",
+        '141': "Zacatecas",
     }
     return switcher.get(argument, "nothing")
+#Borramos la tabala
+DelStatus = borrar_clientes('Borrando tabla clientes....')
+print(DelStatus)
 #Sql Injection
 c = 0
 #Iteramos para sacar todos los Registros
@@ -49,18 +70,24 @@ Paginas =  0
 Limite = True
 while Limite == True:
     Paginas += 100
-    path_url  = ''
+    path_url  = 'https://api.pipedrive.com/v1/persons:(id,org_id,name,phone,email,4ec550c8ad97ef93d2206d97a89b5042a287f360,10c6f29db285091a1d2854ff95fc5f864233905d,17852a8bfe7875c8426908547a6746954920495f,add_time,0f2ec4fcdff4df19ba746a04903303ea21948924,23f6f926a83f8c72a845c09920ca22dc194fb35a)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d&start=' + str(Paginas) + 'limit=100'
     r=urlopen(path_url)
     data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
 
     for datos in data["data"]:
         c = c+1;
-        sql = str(c) + '.-INSERT INTO [SAP].[dbo].[Clientes] VALUES(\''
+        sql ='INSERT INTO [SAP].[dbo].[Clientes] VALUES(\''
         #Id
         sql += str(datos['id']) + '\''
         #IdEmpresa
-        sql += str(datos['org_id']['value']) + '\''
+        if datos['org_id'] is None:
+            sql += ',\'0\''
+        else:
+            if datos['org_id']['value'] == "":
+                sql += ',\'0\''
+            else:
+                sql +=',\'' + str(datos['org_id']['value']) + '\''
         #Nombre
         sql += ',\'' + datos['name'] + '\''
         #Bloque sql del  viejo sistema
@@ -73,7 +100,7 @@ while Limite == True:
         #Email
         sql += ',\'' + str(datos['email'][0]['value']) + '\''
         #Bloque sql
-        sql += 'emial2'
+        sql += ',\'emial2\''
         #Puesto
         sql += ',\'' + unicode(datos['4ec550c8ad97ef93d2206d97a89b5042a287f360']) + '\''
         #Tratamiento
@@ -96,5 +123,5 @@ while Limite == True:
         sql += ',\'0\',\'0\',\'0\',\'0\''
         sql += ',\'0\',\'0\',\'0\')'
         print(sql)
-
+        insertar(sql)
 print("######### Registros proesados a MSQLServer No.:" + str(c) + "##########")

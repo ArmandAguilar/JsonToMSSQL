@@ -3,23 +3,26 @@
 import json
 from urllib2 import urlopen
 import unicodedata
-#import pymssql
+import pymssql
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 print("######### Importando datos de Organizaciones #########")
 #Def para borrar tabla sql
-#def borrar_empresas(arg):
-#    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
-#    cur = conn.cursor()
-#    cur.execute('DELETE FROM [SAP].[dbo].[Empresas]')
-#    conn.commit()
-#    conn.close()
-#    return arg
-#def insertar(sql):
-#    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
-#    cur = conn.cursor()
-#    cur.execute('sql)
-#    conn.commit()
-#    conn.close()
-#    return conn
+def borrar_empresas(arg):
+    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    cur = conn.cursor()
+    cur.execute('DELETE FROM [SAP].[dbo].[Empresas]')
+    conn.commit()
+    conn.close()
+    return arg
+def insertar(sql):
+    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+    conn.close()
+    return conn
 #Def de campos varibles
 def estdo_empresa(argument):
     switcher = {
@@ -33,27 +36,27 @@ def estdo_empresa(argument):
         '117': "Colima",
         '118': "CDMX",
         '119': "Durango",
-        '120': "Estado de Mexico",
+        '120': "Estado de México",
         '121': "Guanajuato",
         '122': "Guerrero",
         '123': "Hidalgo",
         '124': "Jalisco",
-        '125': "Michoacan",
+        '125': "Michoacán",
         '126': "Morelos",
         '127': "Nayarit",
-        '128': "Nuevo Leon",
+        '128': "Nuevo León",
         '129': "Oaxaca",
         '130': "Puebla",
         '131': "Queretaro",
         '132': "Quintana Roo",
-        '133': "San Luis Potosi",
+        '133': "San Luis Potosí",
         '134': "Sinaloa",
         '135': "Sonora",
         '136': "Tabasco",
         '137': "Tamaulipas",
         '138': "Tlaxcala",
         '139': "Veracruz",
-        '140': "Yucatan",
+        '140': "Yucatán",
         '141': "Zacatecas",
     }
     return switcher.get(argument, "nothing")
@@ -77,10 +80,10 @@ def perfil_empresa(argument):
         '156': "PersonaFisica",
         '157': "InfraestructuraPublica",
     }
-    return switcher.get(argument, "nothing")
+    return switcher.get(unicode(argument), "nothing")
 #Borramos la tabala
-#DelStatus = borrar_empresas('Borrando tabla empresas....')
-#print(DelStatus)
+DelStatus = borrar_empresas('Borrando tabla empresas....')
+print(DelStatus)
 #Sql Injection
 c = 0
 #Iteramos para sacar todos los Registros
@@ -90,7 +93,7 @@ while Limite == True:
     Paginas += 100
     path_url  = 'https://api.pipedrive.com/v1/organizations:(id,name,52d696d9b7a5bb5720c17ca1b711061693067b6e,88f1db137d17d589d2335cf77ef4f06d3ac30809,30d6284d10ed91edf62d222d51d441f2a5bca1fc,73f181bd11548510a4dcfadafc036ff5dcdde8ae,dd8264651561775a4d9eb4f843811bc599649cb6,add_time,22b81f40f537c0d5b2aabe3041fd6df1967dac52,ee637749af8f57299eb455821a26dce35cf928ba)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d&start=' + str(Paginas) + 'limit=100'
     r=urlopen(path_url)
-    data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
+    data = json.loads(r.read(),encoding='utf-8',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
     for datos in data["data"]:
         c = c+1;
@@ -122,9 +125,9 @@ while Limite == True:
         if datos['73f181bd11548510a4dcfadafc036ff5dcdde8ae'] == '':
             sql += ',\'G\''
         else:
-            giro = perfil_empresa(datos['73f181bd11548510a4dcfadafc036ff5dcdde8ae'])
+            giro = perfil_empresa(unicode(datos['73f181bd11548510a4dcfadafc036ff5dcdde8ae']))
             sql += ',\'' + giro + '\''
-            #Web
+        #Web
         if datos['dd8264651561775a4d9eb4f843811bc599649cb6'] == '':
             sql += ',\'w\''
         else:
@@ -136,12 +139,12 @@ while Limite == True:
             sql += ',\'01-01-1900\''
         else:
             sql += ',\'' + str(datos['add_time']) + '\''
-        #Estado Rep
+		#Estado Rep
         if datos['22b81f40f537c0d5b2aabe3041fd6df1967dac52'] == '':
             sql += ',\'-Estado-\''
         else:
-            Edo = estdo_empresa(datos['22b81f40f537c0d5b2aabe3041fd6df1967dac52'])
-            sql += ',\'' + Edo + '\''
+			Edo = estdo_empresa(unicode(datos['22b81f40f537c0d5b2aabe3041fd6df1967dac52']))
+			sql += ',\'' + Edo +'\''
         #Bloque de sql
         sql += ',\'T\',\'E\',\'T\',\'E\',\'T\',\'E\',\'0\''
         sql += ',\'0\',\'0\',\'01-01-1900\',\'0\',\'0\''
@@ -151,7 +154,7 @@ while Limite == True:
         sql += ',\'O\',\'01-01-1900\',\'P\',\'O\',\'01-01-1900\',\'P\',\'O\',\'01-01-1900\''
         #Penticla 4
         if datos['ee637749af8f57299eb455821a26dce35cf928ba'] == "":
-            sql += '\'Potencial4\''
+            sql += ',\'P\''
         else:
             sql += ',\'' + str(datos['ee637749af8f57299eb455821a26dce35cf928ba']) + '\''
         #Bloque de sql
@@ -164,6 +167,6 @@ while Limite == True:
         sql += ',\'01-01-1900\',\'B\',\'O\',\'01-01-1900\',\'B\',\'O\''
         sql += ',\'01-01-1900\',\'B\',\'O\',\'01-01-1900\',\'B\''
         sql += ',\'O\',\'V\',\'0\',\'0\',\'0\',\'0\')'
-        #insertar(sql)
         print(sql)
+        insertar(sql)
 print("######### Registros proesados a MSQLServer No.:" + str(c) + "##########")

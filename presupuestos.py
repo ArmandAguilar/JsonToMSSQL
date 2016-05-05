@@ -3,8 +3,26 @@
 import json
 from urllib2 import urlopen
 import unicodedata
-
+import pymssql
+import sys
+reload(sys)
+sys.setdefaultencoding("utf-8")
 print("######### Importando datos de Negocios #########")
+#Def para borrar tabla sql
+def borrar_presupuestos(arg):
+    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    cur = conn.cursor()
+    cur.execute('DELETE FROM [SAP].[dbo].[Presupuestos]')
+    conn.commit()
+    conn.close()
+    return arg
+def insertar(sql):
+    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+    conn.close()
+    return conn
 #Switchers
 def presupuestos_categorizacion(argument):
     switcher = {
@@ -33,26 +51,32 @@ Paginas =  0
 Limite = True
 while Limite == True:
     Paginas += 100
-    path_url  = ''
+    path_url  = 'https://api.pipedrive.com/v1/deals:(id,person_id,org_id,title,9d6b02fe5f3a6926be97fe956149713d8876eb94,add_time,next_activity_date,close_time,value,8ee24c17f3ac04493089780b7cffee1512a1c134,status,5fbdf9384d1386ea81869f1916f8b5315c8de476,6a3fcf31541cf6790d804c1d3815d2a26292fcae,5fbdf9384d1386ea81869f1916f8b5315c8de476,fc28f857b56a26688545ca6f23157b3f2a906d5f,949f438cfe1937242f13455abddc2fd5ce83d8b6,5ca7ac46b820ac0bd01c58d55856386f37969ec0)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d&start=' + str(Paginas) + 'limit=100'
     r=urlopen(path_url)
     data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
 
     for datos in data["data"]:
         c = c+1;
-        sql = str(c) + '.-INSERT INTO [SAP].[dbo].[Presupuestos] VALUES(\''
+        sql = 'INSERT INTO [SAP].[dbo].[Presupuestos] VALUES(\''
         #Id
         sql += str(datos['id']) + '\''
         #IdCliente
-        if datos['person_id'] == "":
+        if datos['person_id'] is None:
             sql += ',\'0\''
         else:
-            sql += ',\'0\''
+            if datos['person_id']['value'] == "":
+                sql += ',\'0\''
+            else:
+                sql +=',\'' + str(datos['person_id']['value']) + '\''
         #IdEmpresa
-        if datos['org_id'] == '':
+        if datos['org_id'] is None:
             sql += ',\'0\''
         else:
-            sql += ',\'' + str(datos['org_id']['value']) + '\''
+            if datos['org_id']['value'] == "":
+                sql += ',\'0\''
+            else:
+                sql +=',\'' + str(datos['org_id']['value']) + '\''
         #Referencia
         if datos['title']:
             sql += ',\'Referencia\''
@@ -82,7 +106,7 @@ while Limite == True:
         if datos['status'] == '':
             sql += ',\'-\''
         else:
-            SEstado = presupuestos_estado(str(datos['5ca7ac46b820ac0bd01c58d55856386f37969ec0']))
+            SEstado = presupuestos_estado(str(datos['status']))
             sql += ',\'' + SEstado + '\''
         #Bloque Sql sistema viejo Termometro,Motivos,Total,Competidor,ImporteInicial
         sql += ',\'0\',\'0\',\'0\',\'0\',\'0\''
