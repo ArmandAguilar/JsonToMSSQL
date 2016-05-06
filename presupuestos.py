@@ -43,7 +43,9 @@ def presupuestos_estado(argument):
             'lost': "Perdido",
         }
         return switcher.get(argument, "Abierto")
-
+#Borramos la tabala
+DelStatus = borrar_presupuestos('Borrando tabla presupuestos....')
+print(DelStatus)
 #Sql Injection
 c = 0
 #Iteramos para sacar todos los Registros
@@ -51,9 +53,9 @@ Paginas =  0
 Limite = True
 while Limite == True:
     Paginas += 100
-    path_url  = 'https://api.pipedrive.com/v1/deals:(id,person_id,org_id,title,9d6b02fe5f3a6926be97fe956149713d8876eb94,add_time,next_activity_date,close_time,value,8ee24c17f3ac04493089780b7cffee1512a1c134,status,5fbdf9384d1386ea81869f1916f8b5315c8de476,6a3fcf31541cf6790d804c1d3815d2a26292fcae,5fbdf9384d1386ea81869f1916f8b5315c8de476,fc28f857b56a26688545ca6f23157b3f2a906d5f,949f438cfe1937242f13455abddc2fd5ce83d8b6,5ca7ac46b820ac0bd01c58d55856386f37969ec0)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d&start=' + str(Paginas) + 'limit=100'
+    path_url  = 'https://api.pipedrive.com/v1/deals:(id,person_id,org_id,title,9d6b02fe5f3a6926be97fe956149713d8876eb94,add_time,next_activity_date,close_time,value,8ee24c17f3ac04493089780b7cffee1512a1c134,status,5fbdf9384d1386ea81869f1916f8b5315c8de476,6a3fcf31541cf6790d804c1d3815d2a26292fcae,5fbdf9384d1386ea81869f1916f8b5315c8de476,fc28f857b56a26688545ca6f23157b3f2a906d5f,949f438cfe1937242f13455abddc2fd5ce83d8b6,5ca7ac46b820ac0bd01c58d55856386f37969ec0,6ea10f31bbceef5313534f5146886b85b58684eb)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d&start=' + str(Paginas) + 'limit=100'
     r=urlopen(path_url)
-    data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
+    data = json.loads(r.read(),encoding='utf-8',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
 
     for datos in data["data"]:
@@ -78,77 +80,126 @@ while Limite == True:
             else:
                 sql +=',\'' + str(datos['org_id']['value']) + '\''
         #Referencia
-        if datos['title']:
+        if datos['title'] == "":
             sql += ',\'Referencia\''
         else:
-            sql += ',\'' + str(datos['title']) + '\''
+            titles = datos['title'].encode('UTF-8', 'replace')
+            titles.encode('ascii','ignore')
+            titles.encode('utf-8',errors='replace')
+
+            sql += ',\'' + titles + '\''
         #Direccion
-        if datos['9d6b02fe5f3a6926be97fe956149713d8876eb94'] == '':
+        if datos['9d6b02fe5f3a6926be97fe956149713d8876eb94'] is None:
             sql += ',\'Direccion\''
         else:
-            sql += ',\'' + unicode(datos['9d6b02fe5f3a6926be97fe956149713d8876eb94']) + '\''
+                if datos['9d6b02fe5f3a6926be97fe956149713d8876eb94'] == '':
+                    sql += ',\'Direccion\''
+                else:
+                    Dir = datos['9d6b02fe5f3a6926be97fe956149713d8876eb94'].encode('UTF-8', 'replace')
+                    Dir.encode('ascii','ignore')
+                    Dir.encode('utf-8',errors='replace')
+                    sql += ',\'' + Dir + '\''
         #FechaCreacion Negocio Creado
-        if datos['add_time'] == '':
+        if datos['add_time'] is None:
             sql += ',\'01-01-1900\''
         else:
-            sql += ',\'' + unicode(datos['add_time']) + '\''
+            if datos['add_time'] == '':
+                sql += ',\'01-01-1900\''
+            else:
+                sql += ',\'' + datos['add_time'].encode('UTF-8', 'replace') + '\''
         #FechaMaduracion Negocio Cerrado en
-        if datos['close_time'] == '':
+        if datos['close_time'] is None:
             sql += ',\'01-01-1900\''
         else:
-            sql += ',\'' + unicode(datos['close_time']) + '\''
+            if datos['close_time'] == '':
+                sql += ',\'01-01-1900\''
+            else:
+                sql += ',\'' + datos['close_time'].encode('UTF-8', 'replace') + '\''
         #FechaProximoContacto] ya interesa
-        if datos['next_activity_date'] == '':
+        if datos['next_activity_date'] is None:
             sql += ',\'01-01-1900\''
         else:
-            sql += ',\'' + unicode(datos['next_activity_date']) + '\''
+            if datos['next_activity_date'] == '':
+                sql += ',\'01-01-1900\''
+            else:
+                sql += ',\'' + datos['next_activity_date'].encode('UTF-8', 'replace') + '\''
         #Estado
         if datos['status'] == '':
             sql += ',\'-\''
         else:
             SEstado = presupuestos_estado(str(datos['status']))
-            sql += ',\'' + SEstado + '\''
+            sql += ',\'' + SEstado.encode('UTF-8', 'replace') + '\''
         #Bloque Sql sistema viejo Termometro,Motivos,Total,Competidor,ImporteInicial
         sql += ',\'0\',\'0\',\'0\',\'0\',\'0\''
         #Importe Final
-        if datos['value'] == '':
+        if datos['value'] is None:
             sql += ',\'0\''
         else:
-            sql += ',\'' + str(datos['value']) + '\''
+            if datos['value'] == '':
+                sql += ',\'0\''
+            else:
+                sql += ',\'' + str(datos['value']) + '\''
         #Bloque slq del biejo sistema
-        sql += ',\'ContribucionBruta\''
+        sql += ',\'0\''
         #ContribucionReal
-        if datos['8ee24c17f3ac04493089780b7cffee1512a1c134'] == '':
+        if datos['8ee24c17f3ac04493089780b7cffee1512a1c134'] is None:
             sql += ',\'0\''
         else:
-            sql += ',\'' + str(datos['8ee24c17f3ac04493089780b7cffee1512a1c134']) + '\''
-            #MargenReal
-        if datos['5fbdf9384d1386ea81869f1916f8b5315c8de476'] ==  '':
+            if datos['8ee24c17f3ac04493089780b7cffee1512a1c134'] == '':
+                sql += ',\'0\''
+            else:
+                sql += ',\'' + str(datos['8ee24c17f3ac04493089780b7cffee1512a1c134']) + '\''
+        #MargenReal
+        if datos['5fbdf9384d1386ea81869f1916f8b5315c8de476'] is None:
             sql += ',\'0\''
         else:
-            sql += ',\'' + str(datos['5fbdf9384d1386ea81869f1916f8b5315c8de476']) + '\''
-            #Proyecto
-        if datos['6a3fcf31541cf6790d804c1d3815d2a26292fcae']:
+            if datos['5fbdf9384d1386ea81869f1916f8b5315c8de476'] ==  '':
+                sql += ',\'0\''
+            else:
+                sql += ',\'' + str(datos['5fbdf9384d1386ea81869f1916f8b5315c8de476']) + '\''
+        #Proyecto
+        if datos['6a3fcf31541cf6790d804c1d3815d2a26292fcae'] is None:
             sql += ',\'-\''
         else:
-            sql += ',\'' + unicode(datos['6a3fcf31541cf6790d804c1d3815d2a26292fcae']) + '\''
+            if datos['6a3fcf31541cf6790d804c1d3815d2a26292fcae'] == '':
+                sql += ',\'-\''
+            else:
+                sql += ',\'' + datos['6a3fcf31541cf6790d804c1d3815d2a26292fcae'].encode('UTF-8', 'replace') + '\''
         #[NoProyecto]
-        if datos['fc28f857b56a26688545ca6f23157b3f2a906d5f'] == '':
+        if datos['fc28f857b56a26688545ca6f23157b3f2a906d5f'] is None:
             sql += ',\'0\''
         else:
-            sql += ',\'' + str(datos['fc28f857b56a26688545ca6f23157b3f2a906d5f']) + '\''
+            if datos['fc28f857b56a26688545ca6f23157b3f2a906d5f'] == '':
+                sql += ',\'0\''
+            else:
+                sql += ',\'' + str(datos['fc28f857b56a26688545ca6f23157b3f2a906d5f']) + '\''
         #[EstatusCompras]
-        if datos['949f438cfe1937242f13455abddc2fd5ce83d8b6'] == '':
+        if datos['949f438cfe1937242f13455abddc2fd5ce83d8b6'] is None:
             sql += ',\'-\''
         else:
-            sql += ',\'' + str(datos['949f438cfe1937242f13455abddc2fd5ce83d8b6']) + '\''
+            if datos['949f438cfe1937242f13455abddc2fd5ce83d8b6'] == '':
+                sql += ',\'-\''
+            else:
+                sql += ',\'' + str(datos['949f438cfe1937242f13455abddc2fd5ce83d8b6']) + '\''
         #[Categorizacion]
-        if datos['5ca7ac46b820ac0bd01c58d55856386f37969ec0'] == '':
+        if datos['5ca7ac46b820ac0bd01c58d55856386f37969ec0'] is None:
             sql += ',\'-\''
         else:
-            SCategorizacion = presupuestos_categorizacion(str(datos['5ca7ac46b820ac0bd01c58d55856386f37969ec0']))
-            sql += ',\'' + SCategorizacion + '\''
+            if datos['5ca7ac46b820ac0bd01c58d55856386f37969ec0'] == '':
+                sql += ',\'-\''
+            else:
+                SCategorizacion = presupuestos_categorizacion(str(datos['5ca7ac46b820ac0bd01c58d55856386f37969ec0']))
+                sql += ',\'' + SCategorizacion.encode('UTF-8', 'replace') + '\''
         #Bloque de sql del sistema viejo
-        sql +='\'Venta\',\'Vendedor\',\'Vista\')'
+        sql +=',\'Venta\',\'Vendedor\',\'Vista\''
+        #IdAntiguo48435f4a7b83707f666bfc53ac8bec0d3b90bea5
+        if datos['6ea10f31bbceef5313534f5146886b85b58684eb'] is None:
+            sql += ',\'0\')'
+        else:
+            if datos['6ea10f31bbceef5313534f5146886b85b58684eb'] == '':
+                sql += ',\'0\')'
+            else:
+                sql += ',\'' + str(datos['6ea10f31bbceef5313534f5146886b85b58684eb']) + '\')'
         print(sql)
+        insertar(sql)
 print("######### Registros proesados a MSQLServer No.:" + str(c) + "##########")
