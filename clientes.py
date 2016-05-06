@@ -10,14 +10,14 @@ sys.setdefaultencoding("utf-8")
 print("######### Importando datos de Personas #########")
 #Def para borrar tabla sql
 def borrar_clientes(arg):
-    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    conn = pymssql.connect(host='INGENIERIA\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
     cur = conn.cursor()
     cur.execute('DELETE FROM [SAP].[dbo].[Clientes]')
     conn.commit()
     conn.close()
     return arg
 def insertar(sql):
-    conn = pymssql.connect(host='DEVELOPER\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    conn = pymssql.connect(host='INGENIERIA\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
     cur = conn.cursor()
     cur.execute(sql)
     conn.commit()

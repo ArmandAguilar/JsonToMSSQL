@@ -8,7 +8,13 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 #req = requests.put('https://api.pipedrive.com/v1/deals/25572?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d',data ={'add_time':'2006-01-06 00:00:00'})
-
+def actualizar(sql):
+    conn = pymssql.connect(host='INGENIERIA\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    cur = conn.cursor()
+    cur.execute(sql)
+    conn.commit()
+    conn.close()
+    return conn
 print("######### Inicio Syn Fehcas #########")
 #path_url  = 'C:\Users\Armand\Desktop\UpdateDate\presupuestos.json'
 #r=urlopen(path_url
@@ -18,5 +24,6 @@ data = json.loads(string_json,encoding='latin-1',cls=None,object_hook=None, pars
 for datos in data:
 
     sql = 'UPDATE [SAP].[dbo].[Presupuestos] SET ,[FechaCreacion] = \'' + str(datos['FechaCreacion']) + '\',[FechaMaduracion] = \'' + str(datos['FechaVigencia']) + '\',[FechaProximoContacto] = \'' + str(datos['CicloVida']) + '\' WHERE IdAntiguo = \'' + str(datos['Id']) + '\''
+    actualizar(sql)
     print(sql)
 print("######### Fin Syn Fehcas #########")
