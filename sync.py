@@ -12,7 +12,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 def actualizar(sql,IdAntiguo):
     try:
-        conn = pymssql.connect(host='INGENIERIA\MSSQLINGENIERIA',user='Sistemas',password='masterMX9456',database='SAP')
+        conn = pymssql.connect(host='',user='',password='',database='')
         cur = conn.cursor()
         cur.execute(sql)
         conn.commit()
