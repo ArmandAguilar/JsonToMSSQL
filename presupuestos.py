@@ -10,14 +10,14 @@ sys.setdefaultencoding("utf-8")
 print("######### Importando datos de Negocios #########")
 #Def para borrar tabla sql
 def borrar_presupuestos(arg):
-    conn = pymssql.connect(host='INGENIERIA\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    conn = pymssql.connect(host='',user='',password='',database='')
     cur = conn.cursor()
     cur.execute('DELETE FROM [SAP].[dbo].[Presupuestos]')
     conn.commit()
     conn.close()
     return arg
 def insertar(sql):
-    conn = pymssql.connect(host='INGENIERIA\MSSQLINGENIERIA',user='sistemas',password='masterMX9456',database='SAP')
+    conn = pymssql.connect(host='',user='',password='',database='')
     cur = conn.cursor()
     cur.execute(sql)
     conn.commit()
@@ -42,14 +42,15 @@ def presupuestos_estado(argument):
             'won': "Cerrado",
             'lost': "Perdido",
         }
-    return switcher.get(argument, "Abierto")
+        return switcher.get(argument, "Abierto")
+
 def presupuestos_estado_compra(argument):
         switcher = {
             '204': "Vacio",
             '205': "Activo",
             '206': "Cerrado",
         }
-    return switcher.get(argument, "Vacio")
+        return switcher.get(argument, "Vacio")
 #Borramos la tabala
 DelStatus = borrar_presupuestos('Borrando tabla presupuestos....')
 print(DelStatus)
@@ -60,7 +61,7 @@ Paginas =  0
 Limite = True
 while Limite == True:
     Paginas += 100
-    path_url  = 'https://api.pipedrive.com/v1/deals:(id,person_id,org_id,title,9d6b02fe5f3a6926be97fe956149713d8876eb94,add_time,next_activity_date,close_time,value,8ee24c17f3ac04493089780b7cffee1512a1c134,status,5fbdf9384d1386ea81869f1916f8b5315c8de476,6a3fcf31541cf6790d804c1d3815d2a26292fcae,5fbdf9384d1386ea81869f1916f8b5315c8de476,fc28f857b56a26688545ca6f23157b3f2a906d5f,949f438cfe1937242f13455abddc2fd5ce83d8b6,5ca7ac46b820ac0bd01c58d55856386f37969ec0,6ea10f31bbceef5313534f5146886b85b58684eb,0a837de9247fbb2bce2fb666f7eb10fd83d25bab)?api_token=84ec27e18fd9bd90a10cdcdcfefd91dab0bbe02d&start=' + str(Paginas) + 'limit=100'
+    path_url  = ''
     r=urlopen(path_url)
     data = json.loads(r.read(),encoding='utf-8',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
@@ -122,7 +123,7 @@ while Limite == True:
                 sql += ',\'01-01-1900\''
             else:
                 sql += ',\'' + datos['close_time'].encode('UTF-8', 'replace') + '\''
-        #FechaProximoContacto] ya interesa
+        #FechaProximoContacto ya interesa
         if datos['next_activity_date'] is None:
             sql += ',\'01-01-1900\''
         else:
@@ -179,7 +180,7 @@ while Limite == True:
             if datos['0a837de9247fbb2bce2fb666f7eb10fd83d25bab'] == '':
                 sql += ',\'0\''
             else:
-                sql += ',\'' + str(datos['fc28f857b56a26688545ca6f23157b3f2a906d5f']) + '\''
+                sql += ',\'' + str(datos['0a837de9247fbb2bce2fb666f7eb10fd83d25bab']) + '\''
         #[EstatusCompras]
         if datos['949f438cfe1937242f13455abddc2fd5ce83d8b6'] is None:
             sql += ',\'-\''
