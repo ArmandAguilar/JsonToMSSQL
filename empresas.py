@@ -23,21 +23,6 @@ def insertar(sql):
     conn.commit()
     conn.close()
     return conn
-def borrar_empresas(arg):
-    conn = pymssql.connect(host='',user='',password='',database='')
-    cur = conn.cursor()
-    cur.execute('DELETE FROM [SAP].[dbo].[Empresas]')
-    conn.commit()
-    conn.close()
-    return arg
-def insertar(sql):
-    conn = pymssql.connect(host='',user='',password='',database='')
-    cur = conn.cursor()
-    cur.execute('sql)
-    conn.commit()
-    conn.close()
-    return conn
-
 #Def de campos varibles
 def estdo_empresa(argument):
     switcher = {
