@@ -6,24 +6,48 @@ import unicodedata
 import pymssql
 import sys
 reload(sys)
+#tokens for api pipedrive and MSSQLINGENIERIA
+from tokens import *
 sys.setdefaultencoding("utf-8")
 print("######### Importando datos de Organizaciones #########")
 #Def para borrar tabla sql
 def borrar_empresas(arg):
-    conn = pymssql.connect(host='',user='sistemas',password='',database='')
+    conn = pymssql.connect(host=host,user=user,password=password,database=database)
     cur = conn.cursor()
     cur.execute('DELETE FROM [SAP].[dbo].[Empresas]')
     conn.commit()
     conn.close()
     return arg
 def insertar(sql):
-    conn = pymssql.connect(host='',user='sistemas',password='',database='')
+    conn = pymssql.connect(host=host,user=user,password=password,database=database)
     cur = conn.cursor()
     cur.execute(sql)
     conn.commit()
     conn.close()
     return conn
 #Def de campos varibles
+
+def tipo_cuenta(argument):
+    switcher = {
+        '158': "CuentaClave",
+        '159': "Vacio",
+        }
+    return switcher.get(argument, "nothing")
+def origen_cliente(argument):
+    switcher = {
+        '160': "Nacional",
+        '161': "Extranjero",
+        }
+    return switcher.get(argument, "nothing")
+def tamano_cliente(argument):
+    switcher = {
+        '162': "Micro",
+        '163': "Pequeño",
+        '164': "Mediano",
+        '165': "Nacional",
+        '166': "Trasnacional",
+        }
+    return switcher.get(argument, "nothing")
 def estdo_empresa(argument):
     switcher = {
         '110': "Aguascalientes",
@@ -90,8 +114,8 @@ c = 0
 Paginas =  0
 Limite = True
 while Limite == True:
-    Paginas += 100
-    path_url  = ''
+
+    path_url  = 'https://api.pipedrive.com/v1/organizations:(id,name,52d696d9b7a5bb5720c17ca1b711061693067b6e,88f1db137d17d589d2335cf77ef4f06d3ac30809,30d6284d10ed91edf62d222d51d441f2a5bca1fc,73f181bd11548510a4dcfadafc036ff5dcdde8ae,dd8264651561775a4d9eb4f843811bc599649cb6,add_time,22b81f40f537c0d5b2aabe3041fd6df1967dac52,ee637749af8f57299eb455821a26dce35cf928ba,00c44b04c61744a5adf809345de6beda0c176be4,6935324325afa785a747865494ceb12676cf1fb9,951b44ad993669a55966b33f400a096415d179a8,ee637749af8f57299eb455821a26dce35cf928ba)?api_token=' + str(api_token) + '&start=' + str(Paginas) + 'limit=100'
     r=urlopen(path_url)
     data = json.loads(r.read(),encoding='utf-8',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
@@ -144,7 +168,7 @@ while Limite == True:
             sql += ',\'-Estado-\''
         else:
 			Edo = estdo_empresa(unicode(datos['22b81f40f537c0d5b2aabe3041fd6df1967dac52']))
-			sql += ',\'' + Edo +'\''
+			sql += ',\'' + Edo.decode('utf-8') +'\''
         #Bloque de sql
         sql += ',\'T\',\'E\',\'T\',\'E\',\'T\',\'E\',\'0\''
         sql += ',\'0\',\'0\',\'01-01-1900\',\'0\',\'0\''
@@ -166,7 +190,44 @@ while Limite == True:
         sql += ',\'01-01-1900\',\'B\',\'O\',\'01-01-1900\',\'B\',\'O\''
         sql += ',\'01-01-1900\',\'B\',\'O\',\'01-01-1900\',\'B\',\'O\''
         sql += ',\'01-01-1900\',\'B\',\'O\',\'01-01-1900\',\'B\''
-        sql += ',\'O\',\'V\',\'0\',\'0\',\'0\',\'0\')'
+        sql += ',\'O\',\'V\',\'0\',\'0\',\'0\',\'0\''
+        #tipo cuenta
+        if datos['00c44b04c61744a5adf809345de6beda0c176be4'] is None:
+            sql += ',\'-\''
+        else:
+            if datos['00c44b04c61744a5adf809345de6beda0c176be4'] == '':
+                sql += ',\'-\''
+            else:
+                tipocuenta = tipo_cuenta(datos['00c44b04c61744a5adf809345de6beda0c176be4'])
+                sql += ',\'' + str(tipocuenta) + '\''
+        #origen_cliente
+        if datos['6935324325afa785a747865494ceb12676cf1fb9'] is None:
+            sql += ',\'-\''
+        else:
+            if datos['6935324325afa785a747865494ceb12676cf1fb9'] == '':
+                sql += ',\'-\''
+            else:
+                origencliente = origen_cliente(datos['6935324325afa785a747865494ceb12676cf1fb9'])
+                sql += ',\'' + str(origencliente) + '\''
+        #revenue
+        if datos['951b44ad993669a55966b33f400a096415d179a8'] is None:
+            sql += ',\'0\''
+        else:
+            if datos['951b44ad993669a55966b33f400a096415d179a8'] == '':
+                sql += ',\'0\''
+            else:
+                tiporevenure = datos['951b44ad993669a55966b33f400a096415d179a8']
+                sql += ',\'' + str(tiporevenure) + '\''
+        #tamano_cliente
+        if datos['ee637749af8f57299eb455821a26dce35cf928ba'] is None:
+            sql += ',\'-\')'
+        else:
+            if datos['ee637749af8f57299eb455821a26dce35cf928ba'] == '':
+                sql += ',\'-\')'
+            else:
+                tamanocliente = tamano_cliente(datos['ee637749af8f57299eb455821a26dce35cf928ba'])
+                sql += ',\'' + str(tamanocliente) + '\')'
         print(sql)
         insertar(sql)
+    Paginas += 100
 print("######### Registros proesados a MSQLServer No.:" + str(c) + "##########")

@@ -6,18 +6,20 @@ import unicodedata
 import pymssql
 import sys
 reload(sys)
+#tokens for api pipedrive and MSSQLINGENIERIA
+from tokens import *
 sys.setdefaultencoding("utf-8")
 print("######### Importando datos de Personas #########")
 #Def para borrar tabla sql
 def borrar_clientes(arg):
-    conn = pymssql.connect(host='',user='',password='',database='')
+    conn = pymssql.connect(host=host,user=user,password=password,database=database)
     cur = conn.cursor()
     cur.execute('DELETE FROM [SAP].[dbo].[Clientes]')
     conn.commit()
     conn.close()
     return arg
 def insertar(sql):
-    conn = pymssql.connect(host='',user='',password='',database='')
+    conn = pymssql.connect(host=host,user=user,password=password,database=database)
     cur = conn.cursor()
     cur.execute(sql)
     conn.commit()
@@ -69,10 +71,10 @@ c = 0
 Paginas =  0
 Limite = True
 while Limite == True:
-    Paginas += 100
-    path_url  = ''
+
+    path_url  = 'https://api.pipedrive.com/v1/persons:(id,org_id,name,phone,email,4ec550c8ad97ef93d2206d97a89b5042a287f360,10c6f29db285091a1d2854ff95fc5f864233905d,17852a8bfe7875c8426908547a6746954920495f,add_time,0f2ec4fcdff4df19ba746a04903303ea21948924,23f6f926a83f8c72a845c09920ca22dc194fb35a)?api_token=' + str(api_token) +'&start=' + str(Paginas) + 'limit=100'
     r=urlopen(path_url)
-    data = json.loads(r.read(),encoding='latin-1',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
+    data = json.loads(r.read(),encoding='utf-8',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
 
     for datos in data["data"]:
@@ -93,7 +95,8 @@ while Limite == True:
         #Bloque sql del  viejo sistema
         sql += ',\'ApellidoP\',\'ApellidoM\''
         #Telefono
-        sql += ',\'' + unicode(datos['phone'][0]['value']) + '\''
+        #sql += ',\'' + str(datos['phone'][0]['value']) + '\''
+        sql += ',\'00-0000-0000\''
         #Bloque sql del viejo sistema
         sql += ',\'Extencio\',\'Telefono2\',\'Extencion2\',\'Telefono3\',\'Extncion3\''
         sql += ',\'Fax\',\'ExtencionFax\',\'Radio\',\'ExtencionRadio\',\'Celular\''
@@ -124,4 +127,5 @@ while Limite == True:
         sql += ',\'0\',\'0\',\'0\')'
         print(sql)
         insertar(sql)
+    Paginas += 100
 print("######### Registros proesados a MSQLServer No.:" + str(c) + "##########")

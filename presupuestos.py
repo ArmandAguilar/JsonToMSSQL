@@ -6,28 +6,70 @@ import unicodedata
 import pymssql
 import sys
 reload(sys)
+#tokens for api pipedrive and MSSQLINGENIERIA
+from tokens import *
+
 sys.setdefaultencoding("utf-8")
 print("######### Importando datos de Negocios #########")
+
 #Def para borrar tabla sql
 def borrar_presupuestos(arg):
-    conn = pymssql.connect(host='',user='',password='',database='')
+    conn = pymssql.connect(host=host,user=user,password=password,database=database)
     cur = conn.cursor()
     cur.execute('DELETE FROM [SAP].[dbo].[Presupuestos]')
     conn.commit()
     conn.close()
     return arg
 def insertar(sql):
-    conn = pymssql.connect(host='',user='',password='',database='')
+    conn = pymssql.connect(host=host,user=user,password=password,database=database)
     cur = conn.cursor()
     cur.execute(sql)
     conn.commit()
     conn.close()
     return conn
 #Switchers
+def origen_propuesta(argument):
+    switcher = {
+        '262': "Primero",
+        '263': "Complementario",
+    }
+    return switcher.get(argument, "nothing")
+def area_contacto(argument):
+    switcher = {
+        '226': "Proyectos",
+        '227': "Construccion",
+        '228': "Mantenimiento",
+        '229': "Compras sin depto. tecnico",
+        '230': "Compras con depto. tecnico",
+        '231': "Inversionista",
+        '232': "Desconocido",
+        '233': "RH",
+        '234': "Proveedores",
+    }
+    return switcher.get(argument, "nothing")
+def medio_contacto(argument):
+    switcher = {
+        '218': "NotificadorWeb",
+        '219': "Telefono",
+        '220': "Chat",
+        '221': "Correo",
+        '222': "Mailling",
+        '223': "Recomendacion",
+        '224': "TrabajoPrevio",
+        '225': "Prospectacion",
+    }
+    return switcher.get(argument, "nothing")
+def tipo_presupuestos(argument):
+    switcher = {
+        '215': "PT1",
+        '216': "PT2",
+        '217': "PT3",
+    }
+    return switcher.get(argument, "nothing")
 def presupuestos_categorizacion(argument):
     switcher = {
         '207': "Calculo",
-        '208': "ProjectosEjecutivos",
+        '208': "ProyectosEjecutivos",
         '209': "ProyectosDeInversion",
         '210': "GerenciaDeProyectos",
         '211': "ObraEspecializada",
@@ -61,8 +103,8 @@ cn = 0
 Paginas =  0
 Limite = True
 while Limite == True:
-    Paginas += 100
-    path_url  = ''
+
+    path_url  = 'https://api.pipedrive.com/v1/deals:(id,person_id,org_id,title,9d6b02fe5f3a6926be97fe956149713d8876eb94,add_time,next_activity_date,close_time,value,8ee24c17f3ac04493089780b7cffee1512a1c134,status,5fbdf9384d1386ea81869f1916f8b5315c8de476,6a3fcf31541cf6790d804c1d3815d2a26292fcae,5fbdf9384d1386ea81869f1916f8b5315c8de476,fc28f857b56a26688545ca6f23157b3f2a906d5f,949f438cfe1937242f13455abddc2fd5ce83d8b6,5ca7ac46b820ac0bd01c58d55856386f37969ec0,6ea10f31bbceef5313534f5146886b85b58684eb,0a837de9247fbb2bce2fb666f7eb10fd83d25bab,de8fbbfc2b0c8ad81a57de2ad2c5ea0a925bed57,3425d9b6fb771c07afa9def1659582575ee77519,e66510859c41827c98571249f4d347ad2b7692fa,61261220b85aeb30bab6f426b143f9cbbf047c2c)?api_token=' + str(api_token) + '&start=' + str(Paginas) + 'limit=100'
     r=urlopen(path_url)
     data = json.loads(r.read(),encoding='utf-8',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
@@ -156,7 +198,14 @@ while Limite == True:
                     else:
                         sql += ',\'' + str(datos['value']) + '\''
                 #Bloque slq del biejo sistema
-                sql += ',\'0\''
+                #Contribucion Brutas
+                if datos['5fbdf9384d1386ea81869f1916f8b5315c8de476'] is None:
+                    sql += ',\'0\''
+                else:
+                    if datos['5fbdf9384d1386ea81869f1916f8b5315c8de476'] ==  '':
+                        sql += ',\'0\''
+                    else:
+                        sql += ',\'' + str(datos['5fbdf9384d1386ea81869f1916f8b5315c8de476']) + '\''
                 #ContribucionReal
                 if datos['8ee24c17f3ac04493089780b7cffee1512a1c134'] is None:
                     sql += ',\'0\''
@@ -211,13 +260,50 @@ while Limite == True:
                 sql +=',\'Venta\',\'Vendedor\',\'Vista\''
                 #IdAntiguo48435f4a7b83707f666bfc53ac8bec0d3b90bea5
                 if datos['6ea10f31bbceef5313534f5146886b85b58684eb'] is None:
-                    sql += ',\'0\')'
+                    sql += ',\'0\''
                 else:
                     if datos['6ea10f31bbceef5313534f5146886b85b58684eb'] == '':
-                        sql += ',\'0\')'
+                        sql += ',\'0\''
                     else:
-                        sql += ',\'' + str(datos['6ea10f31bbceef5313534f5146886b85b58684eb']) + '\')'
+                        sql += ',\'' + str(datos['6ea10f31bbceef5313534f5146886b85b58684eb']) + '\''
+                #origen propuesta
+                if datos['61261220b85aeb30bab6f426b143f9cbbf047c2c'] is None:
+                    sql += ',\'-\''
+                else:
+                    if datos['61261220b85aeb30bab6f426b143f9cbbf047c2c'] == '':
+                        sql += ',\'-\''
+                    else:
+                        origenpropuesta = origen_propuesta(datos['61261220b85aeb30bab6f426b143f9cbbf047c2c'])
+                        sql += ',\'' + str(origenpropuesta) + '\''
+                #area contacto
+                if datos['e66510859c41827c98571249f4d347ad2b7692fa'] is None:
+                    sql += ',\'-\''
+                else:
+                    if datos['e66510859c41827c98571249f4d347ad2b7692fa'] == '':
+                        sql += ',\'-\''
+                    else:
+                        areacontacto = area_contacto(datos['e66510859c41827c98571249f4d347ad2b7692fa'])
+                        sql += ',\'' + str(areacontacto) + '\''
+                #medios contacto
+                if datos['3425d9b6fb771c07afa9def1659582575ee77519'] is None:
+                    sql += ',\'-\''
+                else:
+                    if datos['3425d9b6fb771c07afa9def1659582575ee77519'] == '':
+                        sql += ',\'-\''
+                    else:
+                        mediocontacto = medio_contacto(datos['3425d9b6fb771c07afa9def1659582575ee77519'])
+                        sql += ',\'' + str(mediocontacto) + '\''
+                #tipo presupuestos
+                if datos['de8fbbfc2b0c8ad81a57de2ad2c5ea0a925bed57'] is None:
+                    sql += ',\'-\')'
+                else:
+                    if datos['de8fbbfc2b0c8ad81a57de2ad2c5ea0a925bed57'] == '':
+                        sql += ',\'-\')'
+                    else:
+                        tipopresupuesto = tipo_presupuestos(datos['de8fbbfc2b0c8ad81a57de2ad2c5ea0a925bed57'])
+                        sql += ',\'' + str(tipopresupuesto) + '\')'
                 print(sql)
-                #insertar(sql)
+                insertar(sql)
+    Paginas = Paginas + 100
 print("######### Registros procesados a MSQLServer No.:" + str(c) + "##########")
 print("######### Registros no procesados " + str(cn) + "##########")

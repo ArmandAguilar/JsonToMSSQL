@@ -1,1 +1,4 @@
-Docs/
+*.pyc
+*.DS_Store
+.txt
+tokens.py
