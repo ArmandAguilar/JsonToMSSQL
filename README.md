@@ -25,4 +25,4 @@ Sync our old system made in MSSQL.
 **Clientes** :This script get all Clients of pipe drive and update the table SAP.Clientes.
 
 
-![How is works](https://github.com/ArmandAguilar/teamwork/blob/master/Diagram/Dirgram.png)
+![How is works](https://github.com/ArmandAguilar/JsonToMSSQL/blob/master/Diagram/JsonToMSSQL.png)
