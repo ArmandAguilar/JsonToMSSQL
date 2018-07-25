@@ -4,10 +4,12 @@ import json
 from urllib2 import urlopen
 import unicodedata
 import pymssql
+import pypyodbc as pyodbc
 import sys
 reload(sys)
 #tokens for api pipedrive and MSSQLINGENIERIA
 from tokens import *
+from decimal import Decimal
 
 sys.setdefaultencoding("utf-8")
 print("######### Importando datos de Negocios #########")
@@ -102,14 +104,18 @@ cn = 0
 #Iteramos para sacar todos los Registros
 Paginas =  0
 Limite = True
+iva = 0
+Importe = 0
+iva_porcent = 0
 while Limite == True:
 
-    path_url  = 'https://api.pipedrive.com/v1/deals:(id,person_id,org_id,title,9d6b02fe5f3a6926be97fe956149713d8876eb94,add_time,next_activity_date,close_time,value,8ee24c17f3ac04493089780b7cffee1512a1c134,status,5fbdf9384d1386ea81869f1916f8b5315c8de476,6a3fcf31541cf6790d804c1d3815d2a26292fcae,5fbdf9384d1386ea81869f1916f8b5315c8de476,fc28f857b56a26688545ca6f23157b3f2a906d5f,949f438cfe1937242f13455abddc2fd5ce83d8b6,5ca7ac46b820ac0bd01c58d55856386f37969ec0,6ea10f31bbceef5313534f5146886b85b58684eb,0a837de9247fbb2bce2fb666f7eb10fd83d25bab,de8fbbfc2b0c8ad81a57de2ad2c5ea0a925bed57,3425d9b6fb771c07afa9def1659582575ee77519,e66510859c41827c98571249f4d347ad2b7692fa,61261220b85aeb30bab6f426b143f9cbbf047c2c)?api_token=' + str(api_token) + '&start=' + str(Paginas) + 'limit=100'
+    path_url  = 'https://api.pipedrive.com/v1/deals:(id,person_id,org_id,title,9d6b02fe5f3a6926be97fe956149713d8876eb94,add_time,next_activity_date,close_time,value,8ee24c17f3ac04493089780b7cffee1512a1c134,status,5fbdf9384d1386ea81869f1916f8b5315c8de476,6a3fcf31541cf6790d804c1d3815d2a26292fcae,5fbdf9384d1386ea81869f1916f8b5315c8de476,fc28f857b56a26688545ca6f23157b3f2a906d5f,949f438cfe1937242f13455abddc2fd5ce83d8b6,5ca7ac46b820ac0bd01c58d55856386f37969ec0,6ea10f31bbceef5313534f5146886b85b58684eb,0a837de9247fbb2bce2fb666f7eb10fd83d25bab,de8fbbfc2b0c8ad81a57de2ad2c5ea0a925bed57,3425d9b6fb771c07afa9def1659582575ee77519,e66510859c41827c98571249f4d347ad2b7692fa,61261220b85aeb30bab6f426b143f9cbbf047c2c,f72cf079f1603f23a6c91ab5f15d280ff0a1938a)?api_token=' + str(api_token) + '&start=' + str(Paginas) + 'limit=100'
     r=urlopen(path_url)
     data = json.loads(r.read(),encoding='utf-8',cls=None,object_hook=None, parse_float=None,parse_int=None, parse_constant=None,object_pairs_hook=None)
     Limite= data['additional_data']['pagination']['more_items_in_collection']
-
     for datos in data["data"]:
+        Importe = 0
+        iva = 0
         if datos['person_id'] is None:
             cn = cn + 1
         else:
@@ -197,6 +203,7 @@ while Limite == True:
                         sql += ',\'0\''
                     else:
                         sql += ',\'' + str(datos['value']) + '\''
+                        Importe = float(datos['value'])
                 #Bloque slq del biejo sistema
                 #Contribucion Brutas
                 if datos['5fbdf9384d1386ea81869f1916f8b5315c8de476'] is None:
@@ -295,13 +302,26 @@ while Limite == True:
                         sql += ',\'' + str(mediocontacto) + '\''
                 #tipo presupuestos
                 if datos['de8fbbfc2b0c8ad81a57de2ad2c5ea0a925bed57'] is None:
-                    sql += ',\'-\')'
+                    sql += ',\'-\''
                 else:
                     if datos['de8fbbfc2b0c8ad81a57de2ad2c5ea0a925bed57'] == '':
-                        sql += ',\'-\')'
+                        sql += ',\'-\''
                     else:
                         tipopresupuesto = tipo_presupuestos(datos['de8fbbfc2b0c8ad81a57de2ad2c5ea0a925bed57'])
-                        sql += ',\'' + str(tipopresupuesto) + '\')'
+                        sql += ',\'' + str(tipopresupuesto) + '\''
+                #IVA
+                if datos['f72cf079f1603f23a6c91ab5f15d280ff0a1938a'] is None:
+                    sql += ',\'0\')'
+                else:
+                    if datos['f72cf079f1603f23a6c91ab5f15d280ff0a1938a'] == '':
+                        sql += ',\'0\')'
+                    else:
+                        x = 0.0
+                        #Calculo de IVA
+                        x = 1 + (float(datos['f72cf079f1603f23a6c91ab5f15d280ff0a1938a']) / 100)
+                        iva =  Importe * (1 + (float(datos['f72cf079f1603f23a6c91ab5f15d280ff0a1938a']) / 100))
+                        sql += ',\'' + str(iva) + '\')'
+                #print('Id:' + str(datos['id']) + ' Importe:' + str(Importe) + ' C/Iva: '  + str(iva) + ' TASA:' + str(x))
                 print(sql)
                 insertar(sql)
     Paginas = Paginas + 100
